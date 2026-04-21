@@ -113,6 +113,19 @@ composer run dev
 - Token-basierte Sitzungen
 - Middleware-geschützte Admin-Routen
 
+## 🐳 Docker Entwicklung
+
+```bash
+# Container aufbauen
+docker-compose up -d --build
+
+# Mit Docker entwickeln (volumes montiert)
+docker-compose up -d
+
+# Container stoppen
+docker-compose down
+```
+
 ## 📝 Lizenz
 
 Dieses Projekt steht unter der MIT-Lizenz.
