@@ -20,6 +20,45 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::get('products/export', [ProductController::class, 'export'])->name('products.export');
 });
 */
+Route::get('/qz/certificate', function () {
+    $path = storage_path('app/private/qz/digital-certificate.txt');
+
+    abort_unless(file_exists($path), 404, 'Certificate not found');
+
+    return Response::make(file_get_contents($path), 200, [
+        'Content-Type' => 'text/plain',
+        'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+    ]);
+});
+
+Route::post('/qz/sign', function (Request $request) {
+    $request->validate([
+        'data' => ['required', 'string'],
+    ]);
+
+    $privateKeyPath = storage_path('app/qz/private-key.pem');
+    abort_unless(file_exists($privateKeyPath), 500, 'Private key not found');
+
+    $privateKey = openssl_pkey_get_private(file_get_contents($privateKeyPath));
+    if ($privateKey === false) {
+        abort(500, 'Unable to read private key');
+    }
+
+    $payload = $request->string('data')->toString();
+    $signature = '';
+
+    $ok = openssl_sign($payload, $signature, $privateKey, OPENSSL_ALGO_SHA512);
+    openssl_free_key($privateKey);
+
+    if (!$ok) {
+        abort(500, 'Unable to sign payload');
+    }
+
+    return Response::make(base64_encode($signature), 200, [
+        'Content-Type' => 'text/plain',
+        'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+    ]);
+});
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'Dashboard')->name('dashboard');

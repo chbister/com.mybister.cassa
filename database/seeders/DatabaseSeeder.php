@@ -27,22 +27,22 @@ class DatabaseSeeder extends Seeder
         // Demo Data (German POS)
         $categories = [
             'Getränke' => [
-                ['name' => 'Wasser', 'amount_info' => '0,5l', 'price' => 2.50],
-                ['name' => 'Cola', 'amount_info' => '0,33l', 'price' => 3.00],
-                ['name' => 'Bier', 'amount_info' => '0,5l', 'price' => 3.50],
-                ['name' => 'Apfelschorle', 'amount_info' => '0,5l', 'price' => 3.00],
-                ['name' => 'Limonade', 'amount_info' => '0,33l', 'price' => 3.00],
+                ['name' => 'Bier', 'amount_info' => '0,5l', 'price' => 4.50],
+                ['name' => 'Weizen', 'amount_info' => '0,5l', 'price' => 4.50],
+                ['name' => 'Wein', 'amount_info' => '0,25l', 'price' => 3.50],
+                ['name' => 'Aperol Spritz', 'amount_info' => '0,3l', 'price' => 6.00],
+                ['name' => 'Cola/Fanta/Spezi', 'amount_info' => '0,33l', 'price' => 3.00],
+                ['name' => 'Apfelschorle', 'amount_info' => '0,5l', 'price' => 2.50],
+                ['name' => 'Sprudel', 'amount_info' => '0,5l', 'price' => 2.00],
             ],
             'Speisen' => [
-                ['name' => 'Bratwurst', 'amount_info' => 'im Brötchen', 'price' => 4.50],
-                ['name' => 'Pommes', 'amount_info' => 'Portion', 'price' => 3.50],
-                ['name' => 'Currywurst', 'amount_info' => 'mit Brötchen', 'price' => 5.50],
-                ['name' => 'Brezel', 'amount_info' => 'groß', 'price' => 2.50],
+                ['name' => 'Rote', 'amount_info' => 'im Brötchen', 'price' => 4.00],
+                ['name' => 'Currywurst', 'amount_info' => 'Portion', 'price' => 4.00],
+                ['name' => 'Steak', 'amount_info' => 'mit Brötchen', 'price' => 5.50],
             ],
             'Sonstiges' => [
-                ['name' => 'Kaffee', 'amount_info' => 'Becher', 'price' => 2.00],
-                ['name' => 'Kuchen', 'amount_info' => 'Stück', 'price' => 2.50],
-                ['name' => 'Eis', 'amount_info' => 'Waffel', 'price' => 1.50],
+                ['name' => 'Pfand Glas', 'amount_info' => 'Glas', 'price' => 2.00],
+                ['name' => 'Pfand Flasche', 'amount_info' => 'Flasch', 'price' => 1.00],
             ],
         ];
 

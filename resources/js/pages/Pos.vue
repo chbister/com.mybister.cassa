@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import { connectQz, getDefaultPrinter, printRaw } from '@/composables/qzTray';
 import PosLayout from '@/layouts/PosLayout.vue';
 
 defineOptions({
@@ -66,14 +67,59 @@ const formatPrice = (price: string | number) => {
     }).format(Number(price));
 };
 
-const printOrder = () => {
-    window.print();
-    resetOrder();
-};
+const printerName = 'TM-T20III';
+const isPrinting = ref(false);
+const printError = ref<string | null>(null);
+
+async function printOrder(): Promise<void> {
+    if (orderItems.value.length === 0 || isPrinting.value) {
+        return;
+    }
+
+    isPrinting.value = true;
+    printError.value = null;
+
+    try {
+        const lines = orderItems.value.flatMap((item) => {
+            const unitPrice = Number(item.product.price);
+            const lineTotal = unitPrice * item.quantity;
+
+            return [
+                `${item.product.name}\n`,
+                `${item.quantity} x ${formatPrice(unitPrice)} = ${formatPrice(lineTotal)}\n`,
+            ];
+        });
+
+        const data: string[] = [
+            '\x1B\x40',
+            '*** BON ***\n',
+            '\n',
+            ...lines,
+            '----------------------\n',
+            `SUMME: ${formatPrice(totalPrice.value)}\n`,
+            '\n\n\n',
+            '\x1D\x56\x41',
+        ];
+
+        await printRaw(printerName, data);
+        resetOrder();
+    } catch (error) {
+        console.error('Print failed:', error);
+        printError.value =
+            'Drucken fehlgeschlagen. Bitte QZ Tray und Drucker prüfen.';
+    } finally {
+        isPrinting.value = false;
+    }
+}
 
 const resetOrder = () => {
     orderItems.value = [];
 };
+
+onMounted(async () => {
+    console.log('onMounted');
+    await connectQz();
+});
 </script>
 
 <template>
@@ -85,7 +131,7 @@ const resetOrder = () => {
             <div class="flex-1">
                 <div class="mb-6 flex items-center justify-between">
                     <h1 class="text-3xl font-bold text-gray-900">
-                        Taschenrechner
+                        Taschenrechner {{}}
                     </h1>
                 </div>
 
@@ -260,11 +306,20 @@ const resetOrder = () => {
                             </button>
                             <button
                                 @click="printOrder"
+                                :disabled="
+                                    orderItems.length === 0 || isPrinting
+                                "
+                                class="w-full rounded-xl bg-blue-600 py-4 text-lg font-bold text-white shadow-lg shadow-blue-200 transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                {{ isPrinting ? 'Druck läuft...' : 'Drucken' }}
+                            </button>
+                            <!--button
+                                @click="printOrder"
                                 :disabled="orderItems.length === 0"
                                 class="w-full rounded-xl bg-blue-600 py-4 text-lg font-bold text-white shadow-lg shadow-blue-200 transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 Drucken
-                            </button>
+                            </button-->
                         </div>
                     </div>
                 </div>
