@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
 import { ref, computed, onMounted, watch } from 'vue';
+import logoUrl from '@/assets/printlogo.png';
 import {
     connectQz,
     printRaw,
@@ -175,8 +176,26 @@ const printerName = 'TM-T20III';
 const isPrinting = ref(false);
 const printError = ref<string | null>(null);
 
+async function imageUrlToDataUrl(imageUrl) {
+    const response = await fetch(imageUrl);
+    const blob = await response.blob();
+
+    return await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+
+        reader.readAsDataURL(blob);
+    });
+}
 watch(printerStatus, (newStatus) => {
-    console.log('Printer changed:', newStatus.printerName, printerStatus.value.statusCode, printerStatus.value);
+    console.log(
+        'Printer changed:',
+        newStatus.printerName,
+        printerStatus.value.statusCode,
+        printerStatus.value,
+    );
 
     if (printerStatus.value.statusCode != 'idle') {
         isConnected.value = false;
@@ -194,6 +213,7 @@ async function printOrder(): Promise<void> {
 
     isPrinting.value = true;
     printError.value = null;
+    const logoDataUrl = await imageUrlToDataUrl(logoUrl);
 
     try {
         const data: string[] = ['\x1B\x40\x1B\x74\x13']; // Initialize
@@ -221,6 +241,17 @@ async function printOrder(): Promise<void> {
 
                 const ticket: string[] = [
                     '\x1B\x61\x01', // CENTER ALIGN
+                    {
+                        type: 'raw',
+                        format: 'image',
+                        flavor: 'base64',
+                        data: logoDataUrl,
+                        options: {
+                            language: 'ESCPOS',
+                            imageEncoding: 'gs_v_0',
+                            dotDensity: 'single',
+                        },
+                    },
                     '\x1B\x4D\x00', // Font A
                     '\x1D\x21\x00',
                     '*** ABHOLMARKE ***\n',
