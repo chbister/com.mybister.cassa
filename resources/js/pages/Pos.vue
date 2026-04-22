@@ -1,7 +1,13 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
-import { ref, computed, onMounted } from 'vue';
-import { connectQz, printRaw, isConnected } from '@/composables/qzTray';
+import { ref, computed, onMounted, watch } from 'vue';
+import {
+    connectQz,
+    printRaw,
+    isConnected,
+    printerStatus,
+    checkPrinterReady,
+} from '@/composables/qzTray';
 import PosLayout from '@/layouts/PosLayout.vue';
 
 defineOptions({
@@ -169,6 +175,14 @@ const printerName = 'TM-T20III';
 const isPrinting = ref(false);
 const printError = ref<string | null>(null);
 
+watch(printerStatus, (newStatus) => {
+    console.log('Printer changed:', newStatus.printerName, printerStatus.value.statusCode, printerStatus.value);
+
+    if (printerStatus.value.statusCode != 'idle') {
+        isConnected.value = false;
+    }
+});
+
 const getCategoryName = (categoryId: number) => {
     return props.categories.find((c) => c.id === categoryId)?.name || '';
 };
@@ -260,6 +274,7 @@ const resetOrder = () => {
 onMounted(async () => {
     try {
         await connectQz();
+        await checkPrinterReady(printerName);
     } catch (error) {
         console.error('QZ connection failed:', error);
         printError.value = 'QZ Tray konnte nicht verbunden werden.';
@@ -274,12 +289,15 @@ onMounted(async () => {
         <div class="mx-auto flex max-w-7xl flex-col gap-8 lg:flex-row">
             <!-- Left Side: Product Selection -->
             <div class="flex-1">
-                <!--div class="mb-6 flex items-center justify-between">
-                    <h1 class="text-3xl font-bold text-gray-900">
-                        Taschenrechner {{}}
-                    </h1>
+                <!--div>
+                    Drucker: {{ printerStatus.printerName }}
+                    Status:
+                    {{
+                        printerStatus.statusText ||
+                        printerStatus.message ||
+                        'unbekannt'
+                    }}
                 </div-->
-
                 <div
                     v-for="category in categories"
                     :key="category.id"
@@ -525,13 +543,6 @@ onMounted(async () => {
                                           : 'Drucker offline'
                                 }}
                             </button>
-                            <!--button
-                                @click="printOrder"
-                                :disabled="orderItems.length === 0"
-                                class="w-full rounded-xl bg-blue-600 py-4 text-lg font-bold text-white shadow-lg shadow-blue-200 transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                                Drucken
-                            </button-->
                         </div>
                     </div>
                 </div>
