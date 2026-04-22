@@ -19,6 +19,9 @@ Ein modernes Abholmarken System für kleine Vereinsfeste, entwickelt mit Laravel
 
 ## 🛠️ Technologie-Stack
 
+### Unterstützte Drucker
+- Epson TM-T20III
+
 ### Backend
 - **Laravel 13** - PHP Framework
 - **PHP 8.4** - Runtime
