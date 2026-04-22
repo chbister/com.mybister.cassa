@@ -6,7 +6,8 @@ IMAGE="ghcr.io/chbister/com.mybister.cassa:latest"
 CONTAINER_NAME="cassa"
 PORT="${PORT:-8000}"
 
-pushd ~/Desktop
+DESKTOP_DIR="$(xdg-user-dir DESKTOP)"
+pushd "${DESKTOP_DIR}"
 
 BASE_DIR="$(pwd)"
 DB_DIR="${BASE_DIR}/var/database"
