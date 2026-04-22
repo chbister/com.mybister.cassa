@@ -241,17 +241,6 @@ async function printOrder(): Promise<void> {
 
                 const ticket: string[] = [
                     '\x1B\x61\x01', // CENTER ALIGN
-                    {
-                        type: 'raw',
-                        format: 'image',
-                        flavor: 'base64',
-                        data: logoDataUrl,
-                        options: {
-                            language: 'ESCPOS',
-                            imageEncoding: 'gs_v_0',
-                            dotDensity: 'single',
-                        },
-                    },
                     '\x1B\x4D\x00', // Font A
                     '\x1D\x21\x00',
                     '*** ABHOLMARKE ***\n',
