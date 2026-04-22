@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('amount_info')->nullable();
             $table->decimal('price', 8, 2);
             $table->foreignId('category_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('deposit_product_id')->nullable()->constrained('products')->nullOnDelete();
             $table->timestamps();
         });
     }

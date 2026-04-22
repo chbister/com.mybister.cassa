@@ -1,13 +1,14 @@
-# SVM Kassensystem
+# SVM Abholmarken
 
-Ein modernes Kassensystem für den Einzelhandel, entwickelt mit Laravel, Vue.js und Filament Admin.
+Ein modernes Abholmarken System für kleine Vereinsfeste, entwickelt mit Laravel, Vue.js und Filament Admin.
 
 ## 📋 Funktionen
 
 - **POS (Point of Sale) Interface**
   - Schnelle Produktauswahl nach Kategorien
   - Warenkorb-Verwaltung mit Mengen
-  - Druckfunktion für Bestellscheine
+  - Druckfunktion für Abholmarken
+  - Keine Registrierfunktion, keine Protokollierung
   - Admin Login für Produktverwaltung
 
 - **Produktverwaltung (Filament Admin)**

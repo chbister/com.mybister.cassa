@@ -23,6 +23,10 @@ class ProductsTable
                     ->sortable(),
                 TextColumn::make('category.name')
                     ->searchable(),
+                TextColumn::make('depositProduct.name')
+                    ->label('Pfand')
+                    ->placeholder('Kein Pfand')
+                    ->searchable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
