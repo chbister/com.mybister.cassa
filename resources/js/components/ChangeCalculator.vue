@@ -57,16 +57,38 @@ const suggestedAmounts = computed(() => {
 
     const suggestions = new Set<number>();
 
-    // Exact amount
-    suggestions.add(total);
+    const roundToCents = (value: number): number =>
+        Math.round(value * 100) / 100;
 
-    // Rounded amount (ceil)
-    suggestions.add(Math.ceil(total));
+    const ceilEuro = Math.ceil(total);
+    const nextFive = Math.ceil(total / 5) * 5;
+    const hasCents = Math.abs(total % 1) > 0.001;
 
-    // Common banknotes
-    [10, 20, 50, 100].forEach(bill => {
-        if (bill >= total) {
-            suggestions.add(bill);
+    suggestions.add(roundToCents(total));
+
+    // Auf nächsten vollen Euro
+    if (ceilEuro >= total) {
+        suggestions.add(roundToCents(ceilEuro));
+    }
+
+    // +0,50 nur wenn der Betrag nicht schon glatt ist
+    if (hasCents) {
+        const halfStep = ceilEuro + 0.5;
+        if (halfStep >= total) {
+            suggestions.add(roundToCents(halfStep));
+        }
+    }
+
+    // +1 sinnvoll als kleiner nächster Schritt
+    suggestions.add(roundToCents(ceilEuro + 1));
+
+    // nächster 5€-Schritt
+    suggestions.add(roundToCents(nextFive));
+
+    // einzelne große Nominale
+    [1, 2, 5, 10, 20, 50, 100].forEach((value) => {
+        if (value >= total) {
+            suggestions.add(value);
         }
     });
 
@@ -89,11 +111,14 @@ const formatPriceShort = (price: number) => {
 };
 
 // Reset amount received when opening
-watch(() => props.open, (newVal) => {
-    if (newVal) {
-        amountReceived.value = '';
-    }
-});
+watch(
+    () => props.open,
+    (newVal) => {
+        if (newVal) {
+            amountReceived.value = '';
+        }
+    },
+);
 </script>
 
 <template>
@@ -104,25 +129,39 @@ watch(() => props.open, (newVal) => {
             </DialogHeader>
 
             <div class="grid gap-6 py-4">
-                <div class="flex flex-col items-center justify-center space-y-2 rounded-lg bg-blue-50 p-6 text-blue-700">
-                    <span class="text-sm font-medium uppercase tracking-wider">Gesamtbetrag</span>
-                    <span class="text-4xl font-black">{{ formattedTotalPrice }}</span>
+                <div
+                    class="flex flex-col items-center justify-center space-y-2 rounded-lg bg-blue-50 p-6 text-blue-700"
+                >
+                    <span class="text-sm font-medium tracking-wider uppercase"
+                        >Gesamtbetrag</span
+                    >
+                    <span class="text-4xl font-black">{{
+                        formattedTotalPrice
+                    }}</span>
                 </div>
 
                 <div class="space-y-4">
                     <div class="grid gap-2">
-                        <Label for="amount-received" class="text-base font-semibold">Erhaltener Betrag</Label>
+                        <Label
+                            for="amount-received"
+                            class="text-base font-semibold"
+                            >Erhaltener Betrag</Label
+                        >
                         <div class="relative">
                             <Input
                                 id="amount-received"
                                 v-model="amountReceived"
                                 type="number"
-                                step="0.01"
+                                step="0.1"
                                 placeholder="0,00"
-                                class="h-16 text-2xl font-bold pr-12"
+                                class="h-16 pr-12 text-2xl font-bold"
                                 autofocus
                             />
-                            <div class="absolute right-4 top-1/2 -translate-y-1/2 text-2xl font-bold text-gray-400">€</div>
+                            <div
+                                class="absolute top-1/2 right-4 -translate-y-1/2 text-2xl font-bold text-gray-400"
+                            >
+                                €
+                            </div>
                         </div>
                     </div>
 
@@ -133,7 +172,7 @@ watch(() => props.open, (newVal) => {
                             variant="outline"
                             size="lg"
                             @click="selectSuggestion(amount)"
-                            class="flex-1 min-w-[80px] h-12 text-lg font-bold"
+                            class="h-12 min-w-[80px] flex-1 text-lg font-bold"
                         >
                             {{ formatPriceShort(amount) }}
                         </Button>
@@ -141,11 +180,18 @@ watch(() => props.open, (newVal) => {
                 </div>
 
                 <div
-                    v-if="Number(amountReceived) >= totalPrice && Number(amountReceived) > 0"
+                    v-if="
+                        Number(amountReceived) >= totalPrice &&
+                        Number(amountReceived) > 0
+                    "
                     class="flex flex-col items-center justify-center space-y-1 rounded-lg bg-green-50 p-6 text-green-700 transition-all"
                 >
-                    <span class="text-sm font-medium uppercase tracking-wider">Rückgeld</span>
-                    <span class="text-4xl font-black">{{ formattedChange }}</span>
+                    <span class="text-sm font-medium tracking-wider uppercase"
+                        >Rückgeld</span
+                    >
+                    <span class="text-4xl font-black">{{
+                        formattedChange
+                    }}</span>
                 </div>
             </div>
 
@@ -162,10 +208,17 @@ watch(() => props.open, (newVal) => {
                     <Button
                         size="lg"
                         @click="handlePaidAndPrint"
-                        :disabled="Number(amountReceived) < totalPrice || canPrint === false"
+                        :disabled="
+                            Number(amountReceived) < totalPrice ||
+                            canPrint === false
+                        "
                         class="h-14 bg-green-600 text-lg font-bold hover:bg-green-700"
                     >
-                        {{ canPrint === false ? 'Drucker offline' : 'Bezahlt & Drucken' }}
+                        {{
+                            canPrint === false
+                                ? 'Drucker offline'
+                                : 'Bezahlt & Drucken'
+                        }}
                     </Button>
                 </div>
             </DialogFooter>
