@@ -14,7 +14,7 @@ DB_DIR="${BASE_DIR}/var/database"
 DB_FILE="${DB_DIR}/database.sqlite"
 QZ_DIR="${BASE_DIR}/var/storage/app/private/qz"
 QZ_PUBLIC_CERT="${QZ_DIR}/public-cert.pem"
-QZ_TRAY_JAVA="/opt/qz-tray/runtime/java"
+QZ_TRAY_JAVA="/opt/qz-tray/runtime/bin/java"
 QZ_TRAY_JAR="/opt/qz-tray/qz-tray.jar"
 
 log() {
