@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
+import { Calculator } from 'lucide-vue-next';
 import { ref, computed, onMounted, watch } from 'vue';
 import logoUrl from '@/assets/printlogo.png';
+import ChangeCalculator from '@/components/ChangeCalculator.vue';
 import {
     connectQz,
     printRaw,
@@ -175,6 +177,7 @@ const getDepositProduct = (product: Product) => {
 const printerName = 'TM-T20III';
 const isPrinting = ref(false);
 const printError = ref<string | null>(null);
+const isChangeCalculatorOpen = ref(false);
 
 async function imageUrlToDataUrl(imageUrl) {
     const response = await fetch(imageUrl);
@@ -213,9 +216,9 @@ async function printOrder(): Promise<void> {
 
     isPrinting.value = true;
     printError.value = null;
-    const logoDataUrl = await imageUrlToDataUrl(logoUrl);
 
     try {
+        const logoDataUrl = await imageUrlToDataUrl(logoUrl);
         const data: string[] = ['\x1B\x40\x1B\x74\x13']; // Initialize
         const tickets: string[][] = [];
 
@@ -533,13 +536,14 @@ onMounted(async () => {
                             }}</span>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="flex gap-4">
                             <button
-                                @click="resetOrder"
+                                @click="isChangeCalculatorOpen = true"
                                 :disabled="orderItems.length === 0"
-                                class="w-full rounded-xl bg-gray-200 py-4 text-lg font-bold text-gray-700 transition-colors hover:bg-gray-300 disabled:cursor-not-allowed disabled:opacity-50"
+                                class="flex aspect-square items-center justify-center rounded-xl bg-gray-200 p-4 text-gray-700 transition-colors hover:bg-gray-300 disabled:cursor-not-allowed disabled:opacity-50"
+                                title="Rückgeld"
                             >
-                                Abbruch
+                                <Calculator class="h-6 w-6" />
                             </button>
                             <button
                                 @click="printOrder"
@@ -549,7 +553,7 @@ onMounted(async () => {
                                     !isConnected
                                 "
                                 :class="[
-                                    'w-full rounded-xl py-4 text-lg font-bold text-white shadow-lg transition-colors disabled:cursor-not-allowed disabled:opacity-50',
+                                    'flex-1 rounded-xl py-4 text-lg font-bold text-white shadow-lg transition-colors disabled:cursor-not-allowed disabled:opacity-50',
                                     isConnected
                                         ? 'bg-blue-600 shadow-blue-200 hover:bg-blue-700'
                                         : 'bg-gray-400 shadow-none',
@@ -564,11 +568,30 @@ onMounted(async () => {
                                 }}
                             </button>
                         </div>
+                        <div class="mt-4">
+                            <button
+                                @click="resetOrder"
+                                :disabled="orderItems.length === 0"
+                                class="w-full rounded-xl bg-white border border-gray-200 py-2 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                Bestellung löschen
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <ChangeCalculator
+        v-model:open="isChangeCalculatorOpen"
+        :total-price="totalPrice"
+        :can-print="isConnected"
+        @paid-and-print="() => {
+            isChangeCalculatorOpen = false;
+            printOrder();
+        }"
+    />
 </template>
 
 <style scoped>
