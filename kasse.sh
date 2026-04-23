@@ -42,6 +42,7 @@ log "Starting new container..."
 podman run -d \
 	--name "${CONTAINER_NAME}" \
 	-p "${PORT}:80" \
+	-e FORCE_HTTPS=false \
 	-v "${DB_FILE}:/app/database/database.sqlite:Z" \
 	-v "${QZ_DIR}:/app/storage/app/private/qz:Z" \
 	"${IMAGE}"
