@@ -67,7 +67,7 @@ start_qz_tray() {
 
 start_firefox() {
 	log "Starting Firefox in kiosk mode..."
-	firefox --kiosk "${APP_URL}" >/tmp/kasse-firefox.log 2>&1 &
+	setsid /usr/bin/firefox --kiosk "${APP_URL}" >/tmp/kasse-firefox.log 2>&1 &
 }
 
 log "Pulling latest image..."
@@ -107,6 +107,8 @@ wait_for_app
 start_firefox
 
 popd
+
+sleep 2
 
 cat <<EOF
 
