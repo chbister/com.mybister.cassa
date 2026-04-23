@@ -39,7 +39,7 @@ wait_for_qz_cert() {
 wait_for_app() {
 	log "Waiting for application at ${APP_URL} ..."
 	for i in {1..60}; do
-		if curl -fsS -o /dev/null "${APP_URL}"; then
+		if wget -q --spider "${APP_URL}"; then
 			log "Application is reachable."
 			return 0
 		fi
