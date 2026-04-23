@@ -83,6 +83,8 @@ log "Container started."
 wait_for_qz_cert
 start_qz_tray
 
+firefox --kiosk http://localhost:${PORT} &
+
 popd
 
 cat <<EOF
