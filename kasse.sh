@@ -16,6 +16,7 @@ QZ_DIR="${BASE_DIR}/var/storage/app/private/qz"
 QZ_PUBLIC_CERT="${QZ_DIR}/public-cert.pem"
 QZ_TRAY_JAVA="/opt/qz-tray/runtime/bin/java"
 QZ_TRAY_JAR="/opt/qz-tray/qz-tray.jar"
+APP_URL="http://localhost:${PORT}"
 
 log() {
 	printf "\n[%s] %s\n" "$(date +%H:%M:%S)" "$1"
@@ -35,6 +36,21 @@ wait_for_qz_cert() {
 	return 1
 }
 
+wait_for_app() {
+	log "Waiting for application at ${APP_URL} ..."
+	for i in {1..60}; do
+		if curl -fsS -o /dev/null "${APP_URL}"; then
+			log "Application is reachable."
+			return 0
+		fi
+		sleep 1
+	done
+
+	log "Application did not become reachable in time."
+	return 1
+}
+
+
 start_qz_tray() {
 	if [ ! -x "${QZ_TRAY_JAVA}" ] || [ ! -f "${QZ_TRAY_JAR}" ]; then
 		log "QZ Tray is not installed under /opt/qz-tray, skipping start."
@@ -47,6 +63,11 @@ start_qz_tray() {
 		--headless \
 		--allow "${QZ_PUBLIC_CERT}" \
 		>/tmp/qz-tray.log 2>&1 &
+}
+
+start_firefox() {
+	log "Starting Firefox in kiosk mode..."
+	firefox --kiosk "${APP_URL}" >/tmp/kasse-firefox.log 2>&1 &
 }
 
 log "Pulling latest image..."
@@ -82,8 +103,8 @@ log "Container started."
 
 wait_for_qz_cert
 start_qz_tray
-
-firefox --kiosk http://localhost:${PORT} &
+wait_for_app
+start_firefox
 
 popd
 
