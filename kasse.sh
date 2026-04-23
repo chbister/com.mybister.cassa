@@ -13,9 +13,40 @@ BASE_DIR="$(pwd)"
 DB_DIR="${BASE_DIR}/var/database"
 DB_FILE="${DB_DIR}/database.sqlite"
 QZ_DIR="${BASE_DIR}/var/storage/app/private/qz"
+QZ_PUBLIC_CERT="${QZ_DIR}/public-cert.pem"
+QZ_TRAY_JAVA="/opt/qz-tray/runtime/java"
+QZ_TRAY_JAR="/opt/qz-tray/qz-tray.jar"
 
 log() {
 	printf "\n[%s] %s\n" "$(date +%H:%M:%S)" "$1"
+}
+
+wait_for_qz_cert() {
+	log "Waiting for QZ certificate..."
+	for i in {1..30}; do
+		if [ -s "${QZ_PUBLIC_CERT}" ]; then
+			log "QZ certificate found."
+			return 0
+		fi
+		sleep 1
+	done
+
+	log "QZ certificate was not created in time."
+	return 1
+}
+
+start_qz_tray() {
+	if [ ! -x "${QZ_TRAY_JAVA}" ] || [ ! -f "${QZ_TRAY_JAR}" ]; then
+		log "QZ Tray is not installed under /opt/qz-tray, skipping start."
+		return 0
+	fi
+
+	log "Starting QZ Tray..."
+	nohup "${QZ_TRAY_JAVA}" -jar "${QZ_TRAY_JAR}" \
+		--steal \
+		--headless \
+		--allow "${QZ_PUBLIC_CERT}" \
+		>/tmp/qz-tray.log 2>&1 &
 }
 
 log "Pulling latest image..."
@@ -48,6 +79,9 @@ podman run -d \
 	"${IMAGE}"
 
 log "Container started."
+
+wait_for_qz_cert
+start_qz_tray
 
 popd
 
