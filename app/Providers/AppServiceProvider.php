@@ -24,6 +24,11 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+
+        if (config('app.force_https')) {
+            //logger('FORCE_HTTPS active');
+            URL::forceScheme('https');
+        }
     }
 
     /**
